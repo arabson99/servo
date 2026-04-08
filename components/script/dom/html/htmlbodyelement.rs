@@ -159,7 +159,7 @@ impl VirtualMethods for HTMLBodyElement {
     ) {
         let do_super_mutate = match (attr.local_name(), mutation) {
             (name, AttributeMutation::Set(..)) if name.starts_with("on") => {
-                let window = self.owner_window();
+                let document = self.owner_document();
                 // https://html.spec.whatwg.org/multipage/
                 // #event-handlers-on-elements,-document-objects,-and-window-objects:event-handlers-6
                 match name {
@@ -186,15 +186,18 @@ impl VirtualMethods for HTMLBodyElement {
                     &local_name!("onstorage") |
                     &local_name!("onunhandledrejection") |
                     &local_name!("onunload") => {
-                        let source = &**attr.value();
-                        let evtarget = window.upcast::<EventTarget>(); // forwarded event
-                        let source_line = 1; // TODO(#9604) obtain current JS execution line
-                        evtarget.set_event_handler_uncompiled(
-                            window.get_url(),
-                            source_line,
-                            &name[2..],
-                            source,
-                        );
+                        if document.has_browsing_context() {
+                            let window = document.window();
+                            let source = &**attr.value();
+                            let evtarget = window.upcast::<EventTarget>(); // forwarded event
+                            let source_line = 1; // TODO(#9604) obtain current JS execution line
+                            evtarget.set_event_handler_uncompiled(
+                                window.get_url(),
+                                source_line,
+                                &name[2..],
+                                source,
+                            );
+                        }
                         false
                     },
                     _ => true, // HTMLElement::attribute_mutated will take care of this.
