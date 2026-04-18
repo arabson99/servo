@@ -4031,6 +4031,7 @@ impl HTMLMediaElementEventHandler {
             PlayerEvent::EnoughData => element.playback_enough_data(),
             PlayerEvent::Error(ref error) => element.playback_error(error, cx),
             PlayerEvent::MetadataUpdated(ref metadata) => {
+                warn!("MEDIA TRACE: MetadataUpdated — ready_state={:?}", element.ready_state.get());
                 element.playback_metadata_updated(metadata, CanGc::from_cx(cx))
             },
             PlayerEvent::NeedData => element.playback_need_data(),
@@ -4039,7 +4040,10 @@ impl HTMLMediaElementEventHandler {
                 element.fetch_request(Some(offset), Some(seek_lock))
             },
             PlayerEvent::SeekDone(position) => element.playback_seek_done(position),
-            PlayerEvent::StateChanged(ref state) => element.playback_state_changed(state),
+            PlayerEvent::StateChanged(ref state) => {
+                warn!("MEDIA TRACE: StateChanged({:?}) — ready_state={:?}", state, element.ready_state.get());
+                element.playback_state_changed(state)
+            },
             PlayerEvent::VideoFrameUpdated => element.playback_video_frame_updated(),
         }
     }

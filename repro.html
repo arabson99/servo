@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Sniff Repro</title>
+</head>
+<body>
+    <h3>Testing wav.wav Timing</h3>
+    <audio id="m" src="tests/wpt/tests/media/wav.wav" autoplay controls></audio>
+    
+    <div id="status">Waiting for events...</div>
+
+    <script>
+        const m = document.getElementById('m');
+        const status = document.getElementById('status');
+        
+        m.onloadedmetadata = () => {
+            console.log('DOM: HAVE_METADATA reached');
+            status.innerHTML += '<br>✅ Metadata Loaded';
+        };
+        
+        m.onloadeddata = () => {
+            console.log('DOM: HAVE_CURRENT_DATA reached (Unblocked)');
+            status.innerHTML += '<br>✅ Data Loaded (Success)';
+        };
+
+        m.onerror = () => {
+            console.log('DOM: Error loading audio');
+            status.innerHTML += '<br>❌ Error Loading Audio';
+        };
+    </script>
+</body>
+</html>
