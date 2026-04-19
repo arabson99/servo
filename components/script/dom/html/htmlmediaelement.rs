@@ -3744,6 +3744,13 @@ impl FetchResponseListener for HTMLMediaElementFetchListener {
                 (status.is_success(), *status == StatusCode::PARTIAL_CONTENT)
             });
 
+            warn!(
+                "FETCH TRACE: process_response — status_ok={}, content_length={:?}, seekable={}",
+                status_is_success,
+                self.expected_content_length,
+                is_seekable
+            );
+
         // <https://html.spec.whatwg.org/multipage/#media-data-processing-steps-list>
         if !status_is_success {
             if element.ready_state.get() == ReadyState::HaveNothing {
@@ -3805,6 +3812,13 @@ impl FetchResponseListener for HTMLMediaElementFetchListener {
         _: RequestId,
         chunk: Vec<u8>,
     ) {
+
+        warn!(
+            "FETCH TRACE: chunk — received={} bytes, total={}",
+            chunk.len(),
+            self.fetched_content_length + chunk.len() as u64
+        );
+
         let element = self.element.root();
 
         self.fetched_content_length += chunk.len() as u64;
@@ -3866,6 +3880,13 @@ impl FetchResponseListener for HTMLMediaElementFetchListener {
         status: Result<(), NetworkError>,
         timing: ResourceFetchTiming,
     ) {
+
+        warn!(
+            "FETCH TRACE: EOF — status={:?}, total_bytes={}",
+            status,
+            self.fetched_content_length
+        );
+        
         let element = self.element.root();
 
         // <https://html.spec.whatwg.org/multipage/#media-data-processing-steps-list>
