@@ -30,6 +30,8 @@ use crate::media_stream::GStreamerMediaStream;
 use crate::media_stream_source::{ServoMediaStreamSrc, register_servo_media_stream_src};
 use crate::render::GStreamerRender;
 use crate::source::{ServoSrc, register_servo_src};
+use crate::warn;
+
 
 const DEFAULT_MUTED: bool = false;
 const DEFAULT_PAUSED: bool = true;
@@ -690,9 +692,12 @@ impl GStreamerPlayer {
         let inner_clone = inner.clone();
         let observer = self.observer.clone();
         signal_adapter.connect_media_info_updated(move |_, info| {
+            warn!("GST TRACE: media_info_updated signal received");
             let Ok(metadata) = metadata_from_media_info(info) else {
+                warn!("GST TRACE: metadata_from_media_info FAILED — signal received but dropped");
                 return;
             };
+            warn!("GST TRACE: metadata parsed successfully, sending PlayerEvent::MetadataUpdated");
 
             let mut inner = inner_clone.lock().unwrap();
 
